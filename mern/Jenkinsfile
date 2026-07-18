@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
     environment {
@@ -19,10 +20,10 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 dir('mern/backend') {
-                    sh "docker build -t ${BACKEND_IMAGE}:${TAG} ."
+                    bat "docker build -t %BACKEND_IMAGE%:%TAG% ."
                 }
                 dir('mern/frontend') {
-                    sh "docker build -t ${FRONTEND_IMAGE}:${TAG} ."
+                    bat "docker build -t %FRONTEND_IMAGE%:%TAG% ."
                 }
             }
         }
@@ -33,10 +34,10 @@ pipeline {
                     usernameVariable: "DOCKER_USER",
                     passwordVariable: "DOCKER_PASS"
                 )]) {
-                    sh '''
-                    docker login -u $DOCKER_USER -p $DOCKER_PASS
-                    docker push ${BACKEND_IMAGE}:${TAG}
-                    docker push ${FRONTEND_IMAGE}:${TAG}
+                    bat '''
+                    docker login -u %DOCKER_USER% -p %DOCKER_PASS%
+                    docker push %BACKEND_IMAGE%:%TAG%
+                    docker push %FRONTEND_IMAGE%:%TAG%
                     docker logout
                     '''
                 }
@@ -45,13 +46,13 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: KUBE_CONFIG, variable: "KUBECONFIG")]) {
-                    sh '''
+                    bat '''
                     echo ===== Checking kubeconfig =====
-                    export KUBECONFIG=$KUBECONFIG
+                    set KUBECONFIG=%KUBECONFIG%
                     kubectl config current-context
                     kubectl get nodes
-                    sed -i "s|${BACKEND_IMAGE}:.*|${BACKEND_IMAGE}:${TAG}|" k8s.yaml
-                    sed -i "s|${FRONTEND_IMAGE}:.*|${FRONTEND_IMAGE}:${TAG}|" k8s.yaml
+                    powershell -Command "(Get-Content k8s.yaml) -replace '%BACKEND_IMAGE%:.*', '%BACKEND_IMAGE%:%TAG%' | Set-Content k8s.yaml"
+                    powershell -Command "(Get-Content k8s.yaml) -replace '%FRONTEND_IMAGE%:.*', '%FRONTEND_IMAGE%:%TAG%' | Set-Content k8s.yaml"
                     kubectl apply -f k8s.yaml
                     kubectl rollout restart deployment mongodb-deployment
                     kubectl rollout restart deployment backend-deployment
