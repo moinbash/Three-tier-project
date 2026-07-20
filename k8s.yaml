@@ -62,6 +62,7 @@ spec:
   ports:
     - port: 5050
       targetPort: 5050
+      nodePort: 30050
 ---
 # Frontend
 apiVersion: apps/v1
