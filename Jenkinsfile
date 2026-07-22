@@ -44,7 +44,7 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: KUBE_CONFIG, variable: "KUBECONFIG")]) {
+                 {
                     bat '''
                     echo ===== Checking kubeconfig =====
                     minikube update-context
