@@ -45,6 +45,7 @@ pipeline {
             steps {
                 bat '''
                 echo ===== Checking kubeconfig =====
+                set KUBECONFIG=C:\\Users\\ASUS\\.kube\\config
                 minikube update-context
                 kubectl config current-context
                 kubectl get nodes
