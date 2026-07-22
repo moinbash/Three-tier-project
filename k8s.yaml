@@ -1,0 +1,98 @@
+# MongoDB
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:latest
+          ports:
+            - containerPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+spec:
+  selector:
+    app: mongodb
+  ports:
+    - port: 27017
+      targetPort: 27017
+---
+# Backend
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: moin9592/mern-backend:latest
+          ports:
+            - containerPort: 5050
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  type: NodePort
+  selector:
+    app: backend
+  ports:
+    - port: 5050
+      targetPort: 5050
+      nodePort: 30050
+---
+# Frontend
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: moin9592/mern-frontend:latest
+          ports:
+            - containerPort: 5173
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+    - port: 5173
+      targetPort: 5173
