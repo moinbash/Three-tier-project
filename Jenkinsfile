@@ -6,7 +6,6 @@ pipeline {
         TAG = "${BUILD_NUMBER}"
         // Jenkins credentials IDs
         DOCKER_CREDS = "dockerhub-creds"
-        KUBE_CONFIG  = "kubeconfig-file"
         // GitHub Repo
         GIT_URL = "https://github.com/moinbash/Three-tier-project.git"
     }
@@ -44,21 +43,18 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                 {
-                    bat '''
-                    echo ===== Checking kubeconfig =====
-                    minikube update-context
-                    set KUBECONFIG=%KUBECONFIG%
-                    kubectl config current-context
-                    kubectl get nodes
-                    powershell -Command "(Get-Content k8s.yaml) -replace '%BACKEND_IMAGE%:.*', '%BACKEND_IMAGE%:%TAG%' | Set-Content k8s.yaml"
-                    powershell -Command "(Get-Content k8s.yaml) -replace '%FRONTEND_IMAGE%:.*', '%FRONTEND_IMAGE%:%TAG%' | Set-Content k8s.yaml"
-                    kubectl apply -f k8s.yaml
-                    kubectl rollout restart deployment mongodb-deployment
-                    kubectl rollout restart deployment backend-deployment
-                    kubectl rollout restart deployment frontend-deployment
-                    '''
-                }
+                bat '''
+                echo ===== Checking kubeconfig =====
+                minikube update-context
+                kubectl config current-context
+                kubectl get nodes
+                powershell -Command "(Get-Content k8s.yaml) -replace '%BACKEND_IMAGE%:.*', '%BACKEND_IMAGE%:%TAG%' | Set-Content k8s.yaml"
+                powershell -Command "(Get-Content k8s.yaml) -replace '%FRONTEND_IMAGE%:.*', '%FRONTEND_IMAGE%:%TAG%' | Set-Content k8s.yaml"
+                kubectl apply -f k8s.yaml
+                kubectl rollout restart deployment mongodb-deployment
+                kubectl rollout restart deployment backend-deployment
+                kubectl rollout restart deployment frontend-deployment
+                '''
             }
         }
     }
